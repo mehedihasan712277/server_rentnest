@@ -12,13 +12,14 @@
     ],
     "license": "ISC",
     "author": "Md. Mehedi Hasan",
-    "main": "dist/src/server.js",
+    "main": "./dist/src/server.js",
     "scripts": {
         "dev": "tsx watch src/server.ts",
         "build": "prisma generate && tsc",
         "vercel-build": "prisma generate && tsc",
         "start": "node dist/src/server.js",
-        "stripe:webhook": "stripe listen --forward-to localhost:5000/api/subscription/webhook"
+        "stripe:webhook": "stripe listen --forward-to localhost:5000/api/subscription/webhook",
+        "render-build": "npm install --include=dev && npm run build"
     },
     "devDependencies": {
         "@types/cookie-parser": "^1.4.10",

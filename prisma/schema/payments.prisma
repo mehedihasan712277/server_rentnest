@@ -1,0 +1,15 @@
+model Payment {
+  id              String        @id @default(uuid())
+  rentalRequestId String        @unique
+  userId          String
+  transactionId   String        @unique
+  amount          Float
+  status          PaymentStatus @default(ACTIVE)
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  rentalRequest   RentalRequest @relation(fields: [rentalRequestId], references: [id], onDelete: Cascade)
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}

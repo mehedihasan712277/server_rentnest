@@ -1,0 +1,22 @@
+model Property {
+  id             String          @id @default(uuid())
+  landlordId     String
+  categoryId     String
+  title          String
+  description    String
+  location       String
+  price          Float
+  area           Float?
+  thumbnail      String?
+  amenities      Amenity[]
+  status         PropertyStatus  @default(AVAILABLE)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  landlord       User            @relation(fields: [landlordId], references: [id], onDelete: Cascade)
+  category       Category        @relation(fields: [categoryId], references: [id])
+  rentalRequests RentalRequest[]
+  reviews        Review[]
+  rentals        Rental[]
+
+  @@map("properties")
+}

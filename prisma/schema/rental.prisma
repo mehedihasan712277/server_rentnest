@@ -1,0 +1,16 @@
+model Rental {
+  id         String             @id @default(cuid())
+  tenantId   String
+  propertyId String
+  startDate  DateTime
+  endDate    DateTime?
+  status     SubscriptionStatus @default(ACTIVE)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  tenant     User               @relation(fields: [tenantId], references: [id])
+  property   Property           @relation(fields: [propertyId], references: [id])
+
+  @@index([tenantId])
+  @@index([propertyId])
+  @@map("rentals")
+}

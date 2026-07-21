@@ -14,7 +14,11 @@
     "author": "Md. Mehedi Hasan",
     "main": "dis/src/server.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "dev": "tsx watch src/server.ts",
+        "build": "prisma generate && tsc",
+        "vercel-build": "prisma generate && tsc",
+        "start": "node dist/src/server.js",
+        "stripe:webhook": "stripe listen --forward-to localhost:5000/api/subscription/webhook"
     },
     "devDependencies": {
         "@types/cookie-parser": "^1.4.10",

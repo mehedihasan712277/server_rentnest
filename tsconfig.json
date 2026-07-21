@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "module": "commonjs",
+        "target": "ES2023",
+        "types": ["node"],
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true,
+        "noUncheckedIndexedAccess": true,
+        "strict": true,
+        "moduleDetection": "force",
+        "skipLibCheck": true,
+        "esModuleInterop": true
+    },
+    "exclude": ["node_modules", "dist"]
+}

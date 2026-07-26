@@ -5,11 +5,7 @@ import { propertyController } from "./property.controller";
 
 const router = Router();
 
-router.post(
-    "/",
-    auth(Role.ADMIN, Role.LANDLORD),
-    propertyController.createProperty,
-);
+router.post("/", auth(Role.LANDLORD), propertyController.createProperty);
 
 router.get("/", propertyController.getAllProperty);
 
@@ -23,7 +19,7 @@ router.get("/:propertyId", propertyController.getOneProperty);
 
 router.put(
     "/:propertyId",
-    auth(Role.LANDLORD, Role.ADMIN),
+    auth(Role.LANDLORD),
     propertyController.updateProperty,
 );
 router.put(
@@ -34,7 +30,7 @@ router.put(
 
 router.delete(
     "/:propertyId",
-    auth(Role.LANDLORD, Role.ADMIN),
+    auth(Role.LANDLORD),
     propertyController.deleteProperty,
 );
 

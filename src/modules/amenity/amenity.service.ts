@@ -41,6 +41,17 @@ const getSingleAmenityFromDB = async (amenityId: string) => {
                     properties: true,
                 },
             },
+            creator: {
+                select: {
+                    name: true,
+                    email: true,
+                    profile: {
+                        select: {
+                            bio: true,
+                        },
+                    },
+                },
+            },
         },
     });
 };

@@ -13,6 +13,8 @@ const getAmenityFromDB = async () => {
     return prisma.amenity.findMany({
         omit: {
             creatorId: true,
+            createdAt: true,
+            updatedAt: true,
         },
         include: {
             properties: {

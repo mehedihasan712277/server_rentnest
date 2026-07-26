@@ -244,7 +244,12 @@ const togglePropertyStatusIntoDB = async (
         },
     });
 
-    if (role !== "ADMIN" && property.landlordId !== userId) {
+    // if (role !== "ADMIN" && property.landlordId !== userId) {
+    //     throw new Error(
+    //         "you cannot change it as you dont own it. Only admin and its landord are allowed to change status",
+    //     );
+    // }
+    if (property.landlordId !== userId) {
         throw new Error(
             "you cannot change it as you dont own it. Only admin and its landord are allowed to change status",
         );
@@ -281,7 +286,12 @@ const deletePropertyFromDB = async (
         },
     });
 
-    if (role !== "ADMIN" && property.landlordId !== userId) {
+    // if (role !== "ADMIN" && property.landlordId !== userId) {
+    //     throw new Error(
+    //         "you cannot delete it as you dont own it. Only admin and its landord are allowed to delete",
+    //     );
+    // }
+    if (property.landlordId !== userId) {
         throw new Error(
             "you cannot delete it as you dont own it. Only admin and its landord are allowed to delete",
         );

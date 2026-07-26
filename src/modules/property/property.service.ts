@@ -125,6 +125,106 @@ const getAllPropertyFromDB = async (query: IPropertyQuery) => {
     return result;
 };
 
+const getAllPropertyForAdminFromDB = async (query: IPropertyQuery) => {
+    const limit = query.limit ? Number(query.limit) : 10;
+    const page = query.page ? Number(query.page) : 1;
+    const skip = (page - 1) * limit;
+    const sortBy = query.sortBy ? query.sortBy : "createdAt";
+    const sortOrder = query.sortOrder ? query.sortOrder : "desc";
+
+    const andCondition: PropertyWhereInput[] = [];
+    const amenities = query.amenities
+        ? JSON.parse(query.amenities as string)
+        : null;
+    const amenitiesArray = Array.isArray(amenities) ? amenities : [];
+
+    if (query.searchTerm) {
+        andCondition.push({
+            OR: [
+                {
+                    title: {
+                        contains: query.searchTerm,
+                        mode: "insensitive",
+                    },
+                },
+                {
+                    description: {
+                        contains: query.searchTerm,
+                        mode: "insensitive",
+                    },
+                },
+            ],
+        });
+    }
+    if (query.category) {
+        andCondition.push({
+            category: query.category,
+        });
+    }
+
+    if (query.location) {
+        andCondition.push({
+            location: query.location,
+        });
+    }
+
+    if (query.amenities) {
+        andCondition.push({
+            amenities: {
+                some: {
+                    id: {
+                        in: amenitiesArray,
+                    },
+                },
+            },
+        });
+    }
+
+    // price range filtering
+    if (query.minPrice || query.maxPrice) {
+        andCondition.push({
+            price: {
+                ...(query.minPrice && { gte: Number(query.minPrice) }),
+                ...(query.maxPrice && { lte: Number(query.maxPrice) }),
+            },
+        });
+    }
+
+    const result = await prisma.property.findMany({
+        where: {
+            AND: andCondition,
+        },
+        take: limit,
+        skip: skip,
+        orderBy: {
+            [sortBy]: sortOrder,
+        },
+        include: {
+            reviews: true,
+            landlord: {
+                select: {
+                    name: true,
+                    email: true,
+                },
+            },
+            amenities: {
+                select: {
+                    name: true,
+                    description: true,
+                },
+            },
+            category: {
+                select: {
+                    name: true,
+                },
+            },
+            rentalRequests: true,
+            rentals: true,
+        },
+    });
+    return result;
+};
+
 const getMyOwnPropertyListFromDB = async (creatorId: string) => {
     const result = await prisma.property.findMany({
         where: {
@@ -311,6 +411,7 @@ const deletePropertyFromDB = async (
 export const propertyService = {
     createPropertyIntoDB,
     getAllPropertyFromDB,
+    getAllPropertyForAdminFromDB,
     getMyOwnPropertyListFromDB,
     getOnePropertyFromDB,
     updatePropertyIntoDB,

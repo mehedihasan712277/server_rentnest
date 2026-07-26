@@ -8,6 +8,7 @@ const router = Router();
 router.post("/", auth(Role.LANDLORD), propertyController.createProperty);
 
 router.get("/", propertyController.getAllProperty);
+router.get("/admin", propertyController.getAllPropertyForAdmin);
 
 router.get(
     "/my-properties",

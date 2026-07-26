@@ -35,6 +35,21 @@ const getAllProperty = catchAsync(
     },
 );
 
+const getAllPropertyForAdmin = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const query = req.query;
+        const result =
+            await propertyService.getAllPropertyForAdminFromDB(query);
+        sendResponse(res, {
+            success: true,
+            statusCode: httpStatus.OK,
+            count: result.length,
+            message: "all properties retrived successfully for admin",
+            data: result,
+        });
+    },
+);
+
 const getMyOwnPropertyList = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         const result = await propertyService.getMyOwnPropertyListFromDB(
@@ -132,6 +147,7 @@ const deleteProperty = catchAsync(
 export const propertyController = {
     createProperty,
     getAllProperty,
+    getAllPropertyForAdmin,
     getMyOwnPropertyList,
     getOneProperty,
     updateProperty,

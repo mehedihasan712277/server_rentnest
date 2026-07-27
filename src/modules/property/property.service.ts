@@ -96,6 +96,7 @@ const getAllPropertyFromDB = async (query: IPropertyQuery) => {
     const result = await prisma.property.findMany({
         where: {
             AND: andCondition,
+            status: "AVAILABLE",
         },
         take: limit,
         skip: skip,

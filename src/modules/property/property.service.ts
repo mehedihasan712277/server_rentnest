@@ -157,9 +157,15 @@ const getAllPropertyForAdminFromDB = async (query: IPropertyQuery) => {
             ],
         });
     }
-    if (query.category) {
+    if (query.status) {
         andCondition.push({
-            category: query.category,
+            status: query.status,
+        });
+    }
+
+    if (query.categoryId) {
+        andCondition.push({
+            categoryId: query.categoryId,
         });
     }
 

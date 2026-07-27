@@ -59,9 +59,9 @@ const getAllPropertyFromDB = async (query: IPropertyQuery) => {
             ],
         });
     }
-    if (query.category) {
+    if (query.categoryId) {
         andCondition.push({
-            category: query.category,
+            categoryId: query.categoryId,
         });
     }
 

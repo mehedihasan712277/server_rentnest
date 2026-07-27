@@ -151,7 +151,7 @@ const deleteRequestFromDB = async (
         rental_request.status === "COMPLETED"
     ) {
         throw new Error(
-            "You cannot delete it after request is approved or completed",
+            "You cannot delete it after request is approved or completed. Contact to the landlord",
         );
     }
     await prisma.rentalRequest.delete({

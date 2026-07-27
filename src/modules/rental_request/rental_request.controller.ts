@@ -94,6 +94,26 @@ const updateRequestStatus = catchAsync(
     },
 );
 
+const tenantDeleteRequest = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const id = req.params.requestId;
+
+        if (!id) {
+            throw new Error("rental request id not provided");
+        }
+
+        const result = await rentalRequestServices.tenantDeleteRequestIntoDB(
+            id as string,
+        );
+        sendResponse(res, {
+            success: true,
+            statusCode: HttpStatus.OK,
+            message: "request status updated to delete successfully",
+            data: result,
+        });
+    },
+);
+
 const deleteRequest = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         const rentalrequestId = req.params.requestId;
@@ -102,7 +122,7 @@ const deleteRequest = catchAsync(
             throw new Error("id not provided");
         }
 
-        await rentalRequestServices.deleteRequestFromDB(
+        await rentalRequestServices.adminDeleteRequestFromDB(
             rentalrequestId as string,
             req.user?.id as string,
         );
@@ -123,4 +143,5 @@ export const rentalRequestController = {
     getRentalRequestToMyProperty,
     updateRequestStatus,
     deleteRequest,
+    tenantDeleteRequest,
 };

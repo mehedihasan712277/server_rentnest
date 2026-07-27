@@ -23,13 +23,18 @@ router.get(
 //     rentalRequestController.getSingleRequest,
 // );
 router.put(
+    "/tenant-delete/:requestId",
+    auth(Role.TENANT),
+    rentalRequestController.tenantDeleteRequest,
+);
+router.put(
     "/:requestId",
     auth(Role.LANDLORD),
     rentalRequestController.updateRequestStatus,
 );
 router.delete(
     "/:requestId",
-    auth(Role.TENANT),
+    auth(Role.ADMIN),
     rentalRequestController.deleteRequest,
 );
 

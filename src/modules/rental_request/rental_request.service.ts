@@ -136,7 +136,20 @@ const updateRequestStatusIntoDB = async (
     return result;
 };
 
-const deleteRequestFromDB = async (
+const tenantDeleteRequestIntoDB = async (rentalrequestId: string) => {
+    const result = await prisma.rentalRequest.update({
+        where: {
+            id: rentalrequestId,
+        },
+        data: {
+            status: "DELETED",
+        },
+    });
+
+    return result;
+};
+
+const adminDeleteRequestFromDB = async (
     rentalrequestId: string,
     tenantId: string,
 ) => {
@@ -149,14 +162,10 @@ const deleteRequestFromDB = async (
     if (rental_request.tenantId !== tenantId) {
         throw new Error("you cannot delete others' rental request");
     }
-    if (
-        rental_request.status === "APPROVED" ||
-        rental_request.status === "COMPLETED"
-    ) {
-        throw new Error(
-            "You cannot delete it after request is approved or completed. Contact to the landlord",
-        );
+    if (rental_request.status === "DELETED") {
+        throw new Error("You cannot delete this, it is in process");
     }
+
     await prisma.rentalRequest.delete({
         where: {
             id: rentalrequestId,
@@ -172,5 +181,6 @@ export const rentalRequestServices = {
     getMySentRequestFromDB,
     getRentalRequestToMyPropertyFromDB,
     updateRequestStatusIntoDB,
-    deleteRequestFromDB,
+    adminDeleteRequestFromDB,
+    tenantDeleteRequestIntoDB,
 };

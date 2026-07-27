@@ -139,7 +139,7 @@ const handleRequestStatusIntoDB = async (
     }
 
     if (rental_request.status === "APPROVED") {
-        throw new Error("You cannot change this, it is approved");
+        throw new Error("already approved");
     }
 
     if (rental_request.status === "DELETED") {

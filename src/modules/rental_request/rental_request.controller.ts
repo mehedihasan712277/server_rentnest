@@ -102,8 +102,9 @@ const tenantDeleteRequest = catchAsync(
             throw new Error("rental request id not provided");
         }
 
-        const result = await rentalRequestServices.tenantDeleteRequestIntoDB(
+        const result = await rentalRequestServices.tenantWithdrawRequestIntoDB(
             id as string,
+            req.user?.id as string,
         );
         sendResponse(res, {
             success: true,

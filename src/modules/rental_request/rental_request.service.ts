@@ -160,7 +160,31 @@ const approveRequestStatusIntoDB = async (
     return result;
 };
 
-const tenantDeleteRequestIntoDB = async (rentalrequestId: string) => {
+const tenantWithdrawRequestIntoDB = async (
+    rentalrequestId: string,
+    tenantId: string,
+) => {
+    const rental_request = await prisma.rentalRequest.findUniqueOrThrow({
+        where: {
+            id: rentalrequestId,
+        },
+    });
+
+    if (tenantId !== rental_request.tenantId) {
+        throw new Error(
+            "You cannot have access to do anything to other tenants' rental request",
+        );
+    }
+
+    if (
+        rental_request.status == "PENDING" ||
+        rental_request.status === "REJECTED"
+    ) {
+        throw new Error(
+            "You cannot withdraw your requested after beign approved or completed",
+        );
+    }
+
     const result = await prisma.rentalRequest.update({
         where: {
             id: rentalrequestId,
@@ -198,6 +222,6 @@ export const rentalRequestServices = {
     getMySentRequestFromDB,
     getRentalRequestToMyPropertyFromDB,
     adminDeleteRequestFromDB,
-    tenantDeleteRequestIntoDB,
+    tenantWithdrawRequestIntoDB,
     approveRequestStatusIntoDB,
 };

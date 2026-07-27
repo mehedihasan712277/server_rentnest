@@ -68,6 +68,7 @@ const getRentalRequestToMyProperty = catchAsync(
         sendResponse(res, {
             success: true,
             statusCode: HttpStatus.OK,
+            count: result.length,
             message: "rental request to my properties retrived successfully",
             data: result,
         });

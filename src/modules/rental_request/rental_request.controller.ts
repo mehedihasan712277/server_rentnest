@@ -124,7 +124,6 @@ const deleteRequest = catchAsync(
 
         await rentalRequestServices.adminDeleteRequestFromDB(
             rentalrequestId as string,
-            req.user?.id as string,
         );
         sendResponse(res, {
             success: true,

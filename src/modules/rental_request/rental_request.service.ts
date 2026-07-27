@@ -17,7 +17,7 @@ const createRequestIntoDB = async (payload: IRentalRequestPayload) => {
     });
 
     if (property.landlordId === payload.tenantId) {
-        throw new Error("you cannot request for your own pro[erty");
+        throw new Error("you cannot request for your own property");
     }
 
     if (property.status === "NOTAVAILABLE") {
@@ -35,7 +35,7 @@ const createRequestIntoDB = async (payload: IRentalRequestPayload) => {
     }
 
     const result = await prisma.rentalRequest.create({
-        data: payload,
+        data: { ...payload, landlordId: property.landlordId },
     });
     return result;
 };
@@ -149,19 +149,12 @@ const tenantDeleteRequestIntoDB = async (rentalrequestId: string) => {
     return result;
 };
 
-const adminDeleteRequestFromDB = async (
-    rentalrequestId: string,
-    tenantId: string,
-) => {
+const adminDeleteRequestFromDB = async (rentalrequestId: string) => {
     const rental_request = await prisma.rentalRequest.findUniqueOrThrow({
         where: {
             id: rentalrequestId,
         },
     });
-
-    if (rental_request.tenantId !== tenantId) {
-        throw new Error("you cannot delete others' rental request");
-    }
     if (rental_request.status === "DELETED") {
         throw new Error("You cannot delete this, it is in process");
     }

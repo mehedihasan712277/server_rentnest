@@ -99,6 +99,9 @@ const getRentalRequestToMyPropertyFromDB = async (landlordId: string) => {
             property: {
                 landlordId,
             },
+            status: {
+                notIn: ["REJECTED", "COMPLETED"],
+            },
         },
         include: {
             tenant: {

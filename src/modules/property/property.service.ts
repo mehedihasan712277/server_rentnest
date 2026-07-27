@@ -1,13 +1,16 @@
+import Stripe from "stripe";
 import { Role } from "../../../generated/prisma/enums";
 import { PropertyWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import { IPropertyPayload, IPropertyQuery } from "./property.interface";
+import { stripe } from "../../lib/stripe";
 
 const createPropertyIntoDB = async (
     payload: IPropertyPayload,
     landlordId: string,
 ) => {
-    const result = await prisma.property.create({
+    // 1. Save the property in Postgres first.
+    const property = await prisma.property.create({
         data: {
             landlordId,
             categoryId: payload.categoryId,
@@ -25,7 +28,51 @@ const createPropertyIntoDB = async (
         },
     });
 
-    return result;
+    let product: Stripe.Product | null = null;
+
+    try {
+        // 2. Create a Stripe Product.
+        product = await stripe.products.create({
+            name: property.title,
+            description: property.description,
+            images: property.thumbnail ? [property.thumbnail] : undefined,
+        });
+
+        // 3. Create a recurring monthly Stripe Price.
+        const price = await stripe.prices.create({
+            unit_amount: Math.round(property.price * 100),
+            currency: "usd",
+            recurring: {
+                interval: "month",
+            },
+            product: product.id,
+        });
+
+        // 4. Save Stripe IDs in the database.
+        const updatedProperty = await prisma.property.update({
+            where: { id: property.id },
+            data: {
+                stripeProductId: product.id,
+                stripePriceId: price.id,
+            },
+        });
+
+        return updatedProperty;
+    } catch (error) {
+        // If a Stripe Product was created, archive it.
+        if (product) {
+            await stripe.products.update(product.id, {
+                active: false,
+            });
+        }
+
+        // Remove the partially created property from the database.
+        await prisma.property.delete({
+            where: { id: property.id },
+        });
+
+        throw error;
+    }
 };
 
 const getAllPropertyFromDB = async (query: IPropertyQuery) => {

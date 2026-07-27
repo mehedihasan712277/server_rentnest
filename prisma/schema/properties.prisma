@@ -8,6 +8,8 @@ model Property {
   price          Float
   area           Float?
   thumbnail      String?
+  stripeProductId String?
+  stripePriceId   String?
   amenities      Amenity[]
   status         PropertyStatus  @default(AVAILABLE)
   createdAt      DateTime        @default(now())

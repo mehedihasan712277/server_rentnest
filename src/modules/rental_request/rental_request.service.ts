@@ -121,9 +121,10 @@ const getRentalRequestToMyPropertyFromDB = async (landlordId: string) => {
     return result;
 };
 
-const approveRequestStatusIntoDB = async (
+const handleRequestStatusIntoDB = async (
     rentalrequestId: string,
     landlordId: string,
+    payload: RentalRequestStatus,
 ) => {
     const rental_request = await prisma.rentalRequest.findUniqueOrThrow({
         where: {
@@ -145,16 +146,12 @@ const approveRequestStatusIntoDB = async (
         throw new Error("You cannot change this, it is completed");
     }
 
-    if (rental_request.status === "REJECTED") {
-        throw new Error("You cannot change this, it is rejected");
-    }
-
     const result = await prisma.rentalRequest.update({
         where: {
             id: rentalrequestId,
         },
         data: {
-            status: "APPROVED",
+            status: payload,
         },
     });
 
@@ -224,5 +221,5 @@ export const rentalRequestServices = {
     getRentalRequestToMyPropertyFromDB,
     adminDeleteRequestFromDB,
     tenantWithdrawRequestIntoDB,
-    approveRequestStatusIntoDB,
+    handleRequestStatusIntoDB,
 };

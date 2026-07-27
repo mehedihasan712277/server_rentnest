@@ -29,7 +29,7 @@ router.put(
 );
 router.put(
     "/change-status/:propertyId",
-    auth(Role.ADMIN, Role.LANDLORD),
+    auth(Role.LANDLORD),
     propertyController.togglePropertyStatus,
 );
 

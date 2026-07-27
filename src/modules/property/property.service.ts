@@ -363,7 +363,7 @@ const togglePropertyStatusIntoDB = async (
     // }
     if (property.landlordId !== userId) {
         throw new Error(
-            "you cannot change it as you dont own it. Only admin and its landord are allowed to change status",
+            "you cannot change it as you dont own it. Only its landord are allowed to change status",
         );
     }
 

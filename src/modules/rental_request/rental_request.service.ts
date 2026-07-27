@@ -120,16 +120,40 @@ const getRentalRequestToMyPropertyFromDB = async (landlordId: string) => {
     return result;
 };
 
-const updateRequestStatusIntoDB = async (
+const approveRequestStatusIntoDB = async (
     rentalrequestId: string,
-    payload: { status: RentalRequestStatus },
+    landlordId: string,
 ) => {
+    const rental_request = await prisma.rentalRequest.findUniqueOrThrow({
+        where: {
+            id: rentalrequestId,
+        },
+    });
+
+    if (landlordId !== rental_request.landlordId) {
+        throw new Error(
+            "You cannot change it as you don't belong the property",
+        );
+    }
+
+    if (rental_request.status === "DELETED") {
+        throw new Error("You cannot change this, it is deleted");
+    }
+
+    if (rental_request.status === "COMPLETED") {
+        throw new Error("You cannot change this, it is completed");
+    }
+
+    if (rental_request.status === "REJECTED") {
+        throw new Error("You cannot change this, it is rejected");
+    }
+
     const result = await prisma.rentalRequest.update({
         where: {
             id: rentalrequestId,
         },
         data: {
-            status: payload.status,
+            status: "APPROVED",
         },
     });
 
@@ -173,7 +197,7 @@ export const rentalRequestServices = {
     getSingleRequestFromDB,
     getMySentRequestFromDB,
     getRentalRequestToMyPropertyFromDB,
-    updateRequestStatusIntoDB,
     adminDeleteRequestFromDB,
     tenantDeleteRequestIntoDB,
+    approveRequestStatusIntoDB,
 };

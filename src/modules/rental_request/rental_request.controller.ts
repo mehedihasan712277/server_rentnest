@@ -81,9 +81,9 @@ const updateRequestStatus = catchAsync(
             throw new Error("rental request id not provided");
         }
 
-        const result = await rentalRequestServices.updateRequestStatusIntoDB(
+        const result = await rentalRequestServices.approveRequestStatusIntoDB(
             id as string,
-            req.body,
+            req.user?.id as string,
         );
         sendResponse(res, {
             success: true,

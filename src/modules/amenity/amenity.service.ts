@@ -17,14 +17,14 @@ const getAmenityFromDB = async () => {
             updatedAt: true,
         },
         include: {
-            properties: {
-                select: {
-                    title: true,
-                },
-            },
             _count: {
                 select: {
                     properties: true,
+                },
+            },
+            properties: {
+                select: {
+                    title: true,
                 },
             },
         },

@@ -3,6 +3,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import HttpStatus from "http-status";
 import { rentalRequestServices } from "./rental_request.service";
+import { RentalRequestStatus } from "../../../generated/prisma/client";
 
 const createRequest = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
@@ -84,7 +85,7 @@ const updateRequestStatus = catchAsync(
         const result = await rentalRequestServices.handleRequestStatusIntoDB(
             id as string,
             req.user?.id as string,
-            req.body,
+            req.body.status as RentalRequestStatus,
         );
         sendResponse(res, {
             success: true,

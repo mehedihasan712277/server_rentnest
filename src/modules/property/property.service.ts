@@ -112,6 +112,7 @@ const getAllPropertyFromDB = async (query: IPropertyQuery) => {
             },
             amenities: {
                 select: {
+                    id: true,
                     name: true,
                     description: true,
                 },
@@ -216,6 +217,7 @@ const getAllPropertyForAdminFromDB = async (query: IPropertyQuery) => {
             },
             amenities: {
                 select: {
+                    id: true,
                     name: true,
                     description: true,
                 },

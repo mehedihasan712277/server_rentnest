@@ -177,8 +177,8 @@ const tenantWithdrawRequestIntoDB = async (
     }
 
     if (
-        rental_request.status == "PENDING" ||
-        rental_request.status === "REJECTED"
+        rental_request.status === "COMPLETED" ||
+        rental_request.status === "APPROVED"
     ) {
         throw new Error(
             "You cannot withdraw your requested after beign approved or completed",

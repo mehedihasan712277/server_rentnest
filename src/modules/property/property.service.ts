@@ -282,7 +282,7 @@ const getOnePropertyFromDB = async (propertyId: string) => {
     });
 
     if (result.status === "NOTAVAILABLE") {
-        throw new Error("The propert is not available");
+        throw new Error("The property is not available");
     }
     return result;
 };

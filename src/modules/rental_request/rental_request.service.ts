@@ -73,6 +73,7 @@ const getMySentRequestFromDB = async (tenantId: string) => {
     const result = await prisma.rentalRequest.findMany({
         where: {
             tenantId,
+            status: { in: ["APPROVED", "REJECTED", "PENDING"] },
         },
         include: {
             property: {

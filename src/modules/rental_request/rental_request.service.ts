@@ -147,7 +147,7 @@ const deleteRequestFromDB = async (
         throw new Error("you cannot delete others' rental request");
     }
     if (
-        rental_request.status === "REJECTED" ||
+        rental_request.status === "APPROVED" ||
         rental_request.status === "COMPLETED"
     ) {
         throw new Error(

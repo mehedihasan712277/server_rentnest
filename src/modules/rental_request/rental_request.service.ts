@@ -146,7 +146,14 @@ const deleteRequestFromDB = async (
     if (rental_request.tenantId !== tenantId) {
         throw new Error("you cannot delete others' rental request");
     }
-
+    if (
+        rental_request.status === "REJECTED" ||
+        rental_request.status === "COMPLETED"
+    ) {
+        throw new Error(
+            "You cannot delete it after request is approved or completed",
+        );
+    }
     await prisma.rentalRequest.delete({
         where: {
             id: rentalrequestId,

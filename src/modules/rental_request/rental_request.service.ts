@@ -204,7 +204,7 @@ const adminDeleteRequestFromDB = async (rentalrequestId: string) => {
             id: rentalrequestId,
         },
     });
-    if (rental_request.status === "DELETED") {
+    if (rental_request.status !== "DELETED") {
         throw new Error("You cannot delete this, it is in process");
     }
 

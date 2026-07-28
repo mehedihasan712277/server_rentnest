@@ -38,4 +38,11 @@ router.delete(
     rentalRequestController.deleteRequest,
 );
 
+// User pays for an approved request -> creates the Stripe subscription checkout
+router.post(
+    "/:id/subscribe",
+    auth(Role.TENANT),
+    rentalRequestController.subscribeToRentalRequest,
+);
+
 export const rentalRequestRouter = router;

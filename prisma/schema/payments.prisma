@@ -4,7 +4,7 @@ model Payment {
   userId          String
   transactionId   String        @unique
   amount          Float
-  status          PaymentStatus @default(ACTIVE)
+  status          PaymentStatus @default(COMPLETED)
   paidAt          DateTime?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt

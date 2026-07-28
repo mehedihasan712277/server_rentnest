@@ -50,7 +50,6 @@ const handleStripeWebhook = async (req: Request, res: Response) => {
 
         case "checkout.session.expired": {
             const session = event.data.object as Stripe.Checkout.Session;
-            const orderId = session.metadata?.orderId;
             const rentalRequestId = session.metadata?.rentalRequestId;
 
             if (rentalRequestId) {

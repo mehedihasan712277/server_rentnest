@@ -10,9 +10,10 @@ enum ReviewStatus {
 }
 
 enum PaymentStatus {
-  ACTIVE
-  CANCELED
-  EXPIRED
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
 }
 
 enum SubscriptionStatus {

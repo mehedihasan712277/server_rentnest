@@ -1,6 +1,8 @@
 import { RentalRequestStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { IRentalRequestPayload } from "./rental_request.interface";
+import config from "../../config";
+import { stripe } from "../../lib/stripe";
 
 const createRequestIntoDB = async (payload: IRentalRequestPayload) => {
     const property = await prisma.property.findFirstOrThrow({
@@ -217,6 +219,54 @@ const adminDeleteRequestFromDB = async (rentalrequestId: string) => {
     return null;
 };
 
+const createSubscriptionCheckoutSession = async (
+    id: string,
+    userId: string,
+) => {
+    const rentalRequest = await prisma.rentalRequest.findUniqueOrThrow({
+        where: { id },
+        include: { property: true },
+    });
+
+    if (rentalRequest.tenantId !== userId) {
+        throw new Error(
+            "You are not allowed to subscribe to this rental request",
+        );
+    }
+
+    if (rentalRequest.status !== RentalRequestStatus.APPROVED) {
+        throw new Error("This rental request has not been approved yet");
+    }
+
+    if (!rentalRequest.property.stripePriceId) {
+        throw new Error(
+            "This property does not have a Stripe price configured",
+        );
+    }
+
+    const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        line_items: [
+            {
+                price: rentalRequest.property.stripePriceId,
+                quantity: 1,
+            },
+        ],
+        metadata: {
+            rentalRequestId: rentalRequest.id,
+        },
+        success_url: `${config.client_url}/rentals/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${config.client_url}/rentals/${rentalRequest.id}`,
+    });
+
+    await prisma.rentalRequest.update({
+        where: { id: rentalRequest.id },
+        data: { stripeSessionId: session.id },
+    });
+
+    return { url: session.url };
+};
+
 export const rentalRequestServices = {
     createRequestIntoDB,
     getAllRequestsFromDB,
@@ -226,4 +276,5 @@ export const rentalRequestServices = {
     adminDeleteRequestFromDB,
     tenantWithdrawRequestIntoDB,
     handleRequestStatusIntoDB,
+    createSubscriptionCheckoutSession,
 };

@@ -138,6 +138,23 @@ const deleteRequest = catchAsync(
     },
 );
 
+const subscribeToRentalRequest = catchAsync(async (req, res) => {
+    const { id } = req.params;
+
+    const result =
+        await rentalRequestServices.createSubscriptionCheckoutSession(
+            id as string,
+            req.user!.id,
+        );
+
+    sendResponse(res, {
+        success: true,
+        statusCode: 201,
+        message: "Subscription checkout session created",
+        data: result,
+    });
+});
+
 export const rentalRequestController = {
     createRequest,
     getAllRequests,
@@ -147,4 +164,5 @@ export const rentalRequestController = {
     updateRequestStatus,
     deleteRequest,
     tenantDeleteRequest,
+    subscribeToRentalRequest,
 };

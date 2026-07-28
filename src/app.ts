@@ -13,6 +13,7 @@ import { categoryRouter } from "./modules/category/category.route";
 import { amenityRouter } from "./modules/amenity/amenity.routes";
 import { propertyRouter } from "./modules/property/property.route";
 import { rentalRequestRouter } from "./modules/rental_request/rental_request.routes";
+import { webhookRoutes } from "./modules/checkout/webhook.routes";
 
 const app: Application = express();
 
@@ -22,6 +23,8 @@ app.use(
         credentials: true,
     }),
 );
+
+app.use("/api/webhook", webhookRoutes);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

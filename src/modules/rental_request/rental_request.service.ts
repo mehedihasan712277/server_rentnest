@@ -267,6 +267,20 @@ const createSubscriptionCheckoutSession = async (
     return { url: session.url };
 };
 
+// 4. Called from the webhook once Stripe confirms the subscription payment.
+const completeRentalRequestById = async (
+    id: string,
+    stripeSubscriptionId: string,
+) => {
+    return prisma.rentalRequest.update({
+        where: { id },
+        data: {
+            status: RentalRequestStatus.COMPLETED,
+            stripeSubscriptionId,
+        },
+    });
+};
+
 export const rentalRequestServices = {
     createRequestIntoDB,
     getAllRequestsFromDB,
@@ -277,4 +291,5 @@ export const rentalRequestServices = {
     tenantWithdrawRequestIntoDB,
     handleRequestStatusIntoDB,
     createSubscriptionCheckoutSession,
+    completeRentalRequestById,
 };

@@ -16,6 +16,7 @@ import { rentalRequestRouter } from "./modules/rental_request/rental_request.rou
 import { rentalRouter } from "./modules/rental/rental.routes";
 import { webhookRoutes } from "./modules/checkout/webhook.routes";
 import { paymentRouter } from "./modules/payment/payment.routes";
+import { reviewRouter } from "./modules/review/review.routes";
 
 const app: Application = express();
 
@@ -163,6 +164,7 @@ app.use("/api/properties", propertyRouter);
 app.use("/api/rental-requests", rentalRequestRouter);
 app.use("/api/rentals", rentalRouter);
 app.use("/api/payments", paymentRouter);
+app.use("/api/reviews", reviewRouter);
 
 app.use(notFound);
 app.use(globalErrorHandler);

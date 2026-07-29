@@ -66,6 +66,17 @@ const updateReview = catchAsync(
     },
 );
 
+const handleReviewStatus = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        sendResponse(res, {
+            success: true,
+            statusCode: httpStatus.OK,
+            message: "review updated successfully",
+            data: {},
+        });
+    },
+);
+
 export const reviewControllers = {
     createReview,
     getAllReviews,
@@ -73,4 +84,5 @@ export const reviewControllers = {
     getReviewsToMyProperty,
     deleteReview,
     updateReview,
+    handleReviewStatus,
 };

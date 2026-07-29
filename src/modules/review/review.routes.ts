@@ -13,7 +13,16 @@ router.get(
     auth(Role.LANDLORD),
     reviewControllers.getReviewsToMyProperty,
 );
-router.put("/:reviewId", auth(Role.TENANT), reviewControllers.updateReview);
+router.put(
+    "/edit/:reviewId",
+    auth(Role.TENANT),
+    reviewControllers.updateReview,
+);
+router.put(
+    "/status/:reviewId",
+    auth(Role.ADMIN),
+    reviewControllers.handleReviewStatus,
+);
 router.delete("/:reviewId", auth(Role.TENANT), reviewControllers.deleteReview);
 
 export const reviewRouter = router;

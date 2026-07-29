@@ -3,7 +3,8 @@ const getAllReviewsFrmDB = async () => {};
 const getMyReviewsFromDB = async () => {};
 const getReviewsToMyPropertyFromDB = async () => {};
 const deleteReviewFromDB = async () => {};
-const updateReview = async () => {};
+const updateReviewIntoDB = async () => {};
+const handleReviewStatusIntoDB = async () => {};
 
 export const reviewServices = {
     createReviewIntoDB,
@@ -11,5 +12,6 @@ export const reviewServices = {
     getMyReviewsFromDB,
     getReviewsToMyPropertyFromDB,
     deleteReviewFromDB,
-    updateReview,
+    updateReviewIntoDB,
+    handleReviewStatusIntoDB,
 };

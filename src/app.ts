@@ -17,6 +17,7 @@ import { rentalRouter } from "./modules/rental/rental.routes";
 import { webhookRoutes } from "./modules/checkout/webhook.routes";
 import { paymentRouter } from "./modules/payment/payment.routes";
 import { reviewRouter } from "./modules/review/review.routes";
+import { getLandingPageHtml } from "./utils/landingPage";
 
 const app: Application = express();
 
@@ -34,119 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.get("/", (req: Request, res: Response) => {
-    res.status(200).send(`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RentNest API</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #0f172a;
-            color: #f8fafc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            text-align: center;
-            max-width: 700px;
-            padding: 40px;
-        }
-
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-
-        .status {
-            display: inline-block;
-            background: #16a34a;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 999px;
-            font-weight: bold;
-            margin-bottom: 25px;
-        }
-
-        p {
-            color: #cbd5e1;
-            line-height: 1.8;
-            margin-bottom: 12px;
-        }
-
-        .links {
-            margin-top: 30px;
-        }
-
-        a {
-            color: #38bdf8;
-            text-decoration: none;
-            margin: 0 12px;
-            font-weight: 600;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        footer {
-            margin-top: 40px;
-            color: #94a3b8;
-            font-size: 14px;
-        }
-
-        code {
-            color: #22c55e;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-
-    <h1>🏠 RentNest API</h1>
-
-    <div class="status">
-        ✅ API Running
-    </div>
-
-    <p>
-        A secure and scalable REST API powering the RentNest rental property marketplace.
-    </p>
-
-    <p>
-        Built with <strong>Express.js</strong>, <strong>TypeScript</strong>,
-        <strong>Prisma ORM</strong>, and <strong>PostgreSQL</strong>.
-    </p>
-
-    <p>
-        Authentication • Property Management • Rental Requests • Payments • Reviews
-    </p>
-
-    <div class="links">
-        <a href="https://github.com/mehedihasan712277/backend_rentnest" target="_blank">GitHub</a>
-    </div>
-
-    <footer>
-        Version 1.0.0 • © ${new Date().getFullYear()} RentNest API
-    </footer>
-
-</div>
-
-</body>
-</html>
-    `);
+    res.status(200).send(getLandingPageHtml());
 });
 app.get("/health", (req, res) => {
     res.status(200).json({

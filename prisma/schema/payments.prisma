@@ -1,15 +1,17 @@
 model Payment {
   id              String        @id @default(uuid())
-  rentalRequestId String        @unique
+  rentalId        String
   userId          String
   transactionId   String        @unique
+  stripeInvoiceId String?       @unique
   amount          Float
   status          PaymentStatus @default(COMPLETED)
   paidAt          DateTime?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  rentalRequest   RentalRequest @relation(fields: [rentalRequestId], references: [id], onDelete: Cascade)
+  rental          Rental        @relation(fields: [rentalId], references: [id], onDelete: Cascade)
   user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([rentalId])
   @@map("payments")
 }

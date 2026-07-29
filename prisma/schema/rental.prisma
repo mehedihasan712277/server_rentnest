@@ -10,6 +10,14 @@ model Rental {
   tenant     User               @relation(fields: [tenantId], references: [id])
   property   Property           @relation(fields: [propertyId], references: [id])
 
+  // Stripe subscription tracking
+  stripeSubscriptionId String  @unique
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean  @default(false)
+
+  payments Payment[]
+
   @@index([tenantId])
   @@index([propertyId])
   @@map("rentals")

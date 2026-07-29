@@ -13,7 +13,9 @@ import { categoryRouter } from "./modules/category/category.route";
 import { amenityRouter } from "./modules/amenity/amenity.routes";
 import { propertyRouter } from "./modules/property/property.route";
 import { rentalRequestRouter } from "./modules/rental_request/rental_request.routes";
+import { rentalRouter } from "./modules/rental/rental.routes";
 import { webhookRoutes } from "./modules/checkout/webhook.routes";
+import { paymentRouter } from "./modules/payment/payment.routes";
 
 const app: Application = express();
 
@@ -159,6 +161,8 @@ app.use("/api/categories", categoryRouter);
 app.use("/api/amenities", amenityRouter);
 app.use("/api/properties", propertyRouter);
 app.use("/api/rental-requests", rentalRequestRouter);
+app.use("/api/rentals", rentalRouter);
+app.use("/api/payments", paymentRouter);
 
 app.use(notFound);
 app.use(globalErrorHandler);

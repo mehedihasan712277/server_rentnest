@@ -18,7 +18,7 @@
         "build": "prisma generate && tsc",
         "vercel-build": "prisma generate && tsc",
         "start": "node dist/src/server.js",
-        "stripe:webhook": "stripe listen --forward-to localhost:5000/api/subscription/webhook",
+        "stripe:webhook": "stripe listen --forward-to localhost:5000/api/webhook/stripe",
         "render-build": "npm install --include=dev && npm run build"
     },
     "devDependencies": {

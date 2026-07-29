@@ -65,13 +65,13 @@ const getMyOwnPropertyList = catchAsync(
     },
 );
 
-const getOneProperty = catchAsync(
+const getSingleProperty = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         const propertyId = req.params.propertyId;
         if (!propertyId) {
             throw new Error("property id not provided");
         }
-        const result = await propertyService.getOnePropertyFromDB(
+        const result = await propertyService.getSinglePropertyFromDB(
             propertyId as string,
         );
         sendResponse(res, {
@@ -144,13 +144,33 @@ const deleteProperty = catchAsync(
     },
 );
 
+const getOneProperty = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const propertyId = req.params.propertyId;
+        if (!propertyId) {
+            throw new Error("property id not provided");
+        }
+        const result = await propertyService.getOnePropertyFromDB(
+            propertyId as string,
+            req.user?.id, // NEW
+        );
+        sendResponse(res, {
+            success: true,
+            statusCode: httpStatus.OK,
+            message: "property retrived successfully",
+            data: result,
+        });
+    },
+);
+
 export const propertyController = {
     createProperty,
     getAllProperty,
     getAllPropertyForAdmin,
     getMyOwnPropertyList,
-    getOneProperty,
+    getSingleProperty,
     updateProperty,
     togglePropertyStatus,
     deleteProperty,
+    getOneProperty,
 };

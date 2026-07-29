@@ -4,6 +4,7 @@ import { PropertyWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import { IPropertyPayload, IPropertyQuery } from "./property.interface";
 import { stripe } from "../../lib/stripe";
+import { rentalServices } from "../rental/rental.service";
 
 const createPropertyIntoDB = async (
     payload: IPropertyPayload,
@@ -301,7 +302,7 @@ const getMyOwnPropertyListFromDB = async (creatorId: string) => {
     return result;
 };
 
-const getOnePropertyFromDB = async (propertyId: string) => {
+const getSinglePropertyFromDB = async (propertyId: string) => {
     const result = await prisma.property.findUniqueOrThrow({
         where: {
             id: propertyId,
@@ -467,12 +468,47 @@ const deletePropertyFromDB = async (
     });
 };
 
+const getOnePropertyFromDB = async (propertyId: string, userId?: string) => {
+    const result = await prisma.property.findUniqueOrThrow({
+        where: { id: propertyId },
+        include: {
+            landlord: { select: { id: true, name: true, email: true } },
+            category: { select: { name: true, description: true } },
+            amenities: { select: { name: true, description: true } },
+            reviews: true,
+        },
+    });
+
+    if (result.status === "NOTAVAILABLE") {
+        throw new Error("The property is not available");
+    }
+
+    // Landlord viewing their own listing, or a tenant with a currently-paid
+    // rental on it, gets full details. Everyone else (anonymous browsers,
+    // tenants who never rented it) gets a public-safe view.
+    let hasActiveAccess = false;
+    if (userId) {
+        hasActiveAccess =
+            userId === result.landlordId ||
+            (await rentalServices.hasActiveAccess(userId, propertyId));
+    }
+
+    const { landlord, ...rest } = result;
+
+    return {
+        ...rest,
+        landlord: hasActiveAccess ? landlord : { name: landlord.name },
+        hasActiveAccess,
+    };
+};
+
 export const propertyService = {
     createPropertyIntoDB,
     getAllPropertyFromDB,
     getAllPropertyForAdminFromDB,
     getMyOwnPropertyListFromDB,
     getOnePropertyFromDB,
+    getSinglePropertyFromDB,
     updatePropertyIntoDB,
     togglePropertyStatusIntoDB,
     deletePropertyFromDB,

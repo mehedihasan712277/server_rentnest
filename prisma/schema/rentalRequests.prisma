@@ -5,7 +5,7 @@ model RentalRequest {
   landlordId String
   message    String?
   status     RentalRequestStatus @default(PENDING)
-    // Set once the user starts the subscription checkout
+  // Set once the user starts the subscription checkout
   stripeSessionId String? @unique
   // Set once the webhook confirms payment
   stripeSubscriptionId String? @unique
@@ -13,7 +13,6 @@ model RentalRequest {
   updatedAt  DateTime            @updatedAt
   tenant     User                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   property   Property            @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  payment    Payment?
   review     Review?
 
   @@unique([tenantId, propertyId])

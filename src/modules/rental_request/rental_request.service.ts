@@ -3,6 +3,7 @@ import { prisma } from "../../lib/prisma";
 import { IRentalRequestPayload } from "./rental_request.interface";
 import config from "../../config";
 import { stripe } from "../../lib/stripe";
+import { getOrCreateStripeCustomer } from "../../lib/stripeCustomer";
 
 const createRequestIntoDB = async (payload: IRentalRequestPayload) => {
     const property = await prisma.property.findFirstOrThrow({
@@ -244,16 +245,18 @@ const createSubscriptionCheckoutSession = async (
         );
     }
 
+    const customerId = await getOrCreateStripeCustomer(userId);
+
     const session = await stripe.checkout.sessions.create({
         mode: "subscription",
+        customer: customerId, // NEW
         line_items: [
-            {
-                price: rentalRequest.property.stripePriceId,
-                quantity: 1,
-            },
+            { price: rentalRequest.property.stripePriceId, quantity: 1 },
         ],
-        metadata: {
-            rentalRequestId: rentalRequest.id,
+        metadata: { rentalRequestId: rentalRequest.id },
+        subscription_data: {
+            // NEW — metadata on checkout.session doesn't
+            metadata: { rentalRequestId: rentalRequest.id }, // carry to invoice/subscription events
         },
         success_url: `${config.client_url}/rentals/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${config.client_url}/rentals/${rentalRequest.id}`,

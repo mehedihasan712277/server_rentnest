@@ -5,7 +5,7 @@ CREATE TYPE "Role" AS ENUM ('TENANT', 'LANDLORD', 'ADMIN');
 CREATE TYPE "ReviewStatus" AS ENUM ('APPROVED', 'CANCELED');
 
 -- CreateEnum
-CREATE TYPE "PaymentStatus" AS ENUM ('ACTIVE', 'CANCELED', 'EXPIRED');
+CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED', 'REFUNDED');
 
 -- CreateEnum
 CREATE TYPE "SubscriptionStatus" AS ENUM ('ACTIVE', 'CANCELED', 'EXPIRED');
@@ -14,7 +14,7 @@ CREATE TYPE "SubscriptionStatus" AS ENUM ('ACTIVE', 'CANCELED', 'EXPIRED');
 CREATE TYPE "ActiveStatus" AS ENUM ('ACTIVE', 'BLOCKED', 'DELETED');
 
 -- CreateEnum
-CREATE TYPE "RentalRequestStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'COMPLETED');
+CREATE TYPE "RentalRequestStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'COMPLETED', 'DELETED');
 
 -- CreateEnum
 CREATE TYPE "PropertyStatus" AS ENUM ('AVAILABLE', 'NOTAVAILABLE');
@@ -45,11 +45,12 @@ CREATE TABLE "categories" (
 -- CreateTable
 CREATE TABLE "payments" (
     "id" TEXT NOT NULL,
-    "rentalRequestId" TEXT NOT NULL,
+    "rentalId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "transactionId" TEXT NOT NULL,
+    "stripeInvoiceId" TEXT,
     "amount" DOUBLE PRECISION NOT NULL,
-    "status" "PaymentStatus" NOT NULL DEFAULT 'ACTIVE',
+    "status" "PaymentStatus" NOT NULL DEFAULT 'COMPLETED',
     "paidAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -80,6 +81,8 @@ CREATE TABLE "properties" (
     "price" DOUBLE PRECISION NOT NULL,
     "area" DOUBLE PRECISION,
     "thumbnail" TEXT,
+    "stripeProductId" TEXT,
+    "stripePriceId" TEXT,
     "status" "PropertyStatus" NOT NULL DEFAULT 'AVAILABLE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -97,6 +100,10 @@ CREATE TABLE "rentals" (
     "status" "SubscriptionStatus" NOT NULL DEFAULT 'ACTIVE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "stripeSubscriptionId" TEXT NOT NULL,
+    "currentPeriodStart" TIMESTAMP(3) NOT NULL,
+    "currentPeriodEnd" TIMESTAMP(3) NOT NULL,
+    "cancelAtPeriodEnd" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "rentals_pkey" PRIMARY KEY ("id")
 );
@@ -106,8 +113,11 @@ CREATE TABLE "rentalrequests" (
     "id" TEXT NOT NULL,
     "tenantId" TEXT NOT NULL,
     "propertyId" TEXT NOT NULL,
+    "landlordId" TEXT NOT NULL,
     "message" TEXT,
     "status" "RentalRequestStatus" NOT NULL DEFAULT 'PENDING',
+    "stripeSessionId" TEXT,
+    "stripeSubscriptionId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -130,19 +140,6 @@ CREATE TABLE "reviews" (
 );
 
 -- CreateTable
-CREATE TABLE "subscriptions" (
-    "id" TEXT NOT NULL,
-    "currentPeriodEnd" TIMESTAMP(3) NOT NULL,
-    "status" "PaymentStatus" NOT NULL DEFAULT 'ACTIVE',
-    "stripeCustomerId" TEXT NOT NULL,
-    "stripeSubscriptionId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "subscriptions_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -152,6 +149,7 @@ CREATE TABLE "users" (
     "status" "ActiveStatus" NOT NULL DEFAULT 'ACTIVE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "stripeCustomerId" TEXT,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -171,13 +169,16 @@ CREATE UNIQUE INDEX "amenities_name_key" ON "amenities"("name");
 CREATE UNIQUE INDEX "categories_name_key" ON "categories"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "payments_rentalRequestId_key" ON "payments"("rentalRequestId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "payments_transactionId_key" ON "payments"("transactionId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "payments_stripeInvoiceId_key" ON "payments"("stripeInvoiceId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "profiles_userId_key" ON "profiles"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "rentals_stripeSubscriptionId_key" ON "rentals"("stripeSubscriptionId");
 
 -- CreateIndex
 CREATE INDEX "rentals_tenantId_idx" ON "rentals"("tenantId");
@@ -186,19 +187,22 @@ CREATE INDEX "rentals_tenantId_idx" ON "rentals"("tenantId");
 CREATE INDEX "rentals_propertyId_idx" ON "rentals"("propertyId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "rentalrequests_stripeSessionId_key" ON "rentalrequests"("stripeSessionId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "rentalrequests_stripeSubscriptionId_key" ON "rentalrequests"("stripeSubscriptionId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "rentalrequests_tenantId_propertyId_key" ON "rentalrequests"("tenantId", "propertyId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "reviews_rentalRequestId_key" ON "reviews"("rentalRequestId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "subscriptions_stripeCustomerId_key" ON "subscriptions"("stripeCustomerId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "subscriptions_stripeSubscriptionId_key" ON "subscriptions"("stripeSubscriptionId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_stripeCustomerId_key" ON "users"("stripeCustomerId");
 
 -- CreateIndex
 CREATE INDEX "_AmenityToProperty_B_index" ON "_AmenityToProperty"("B");
@@ -207,7 +211,7 @@ CREATE INDEX "_AmenityToProperty_B_index" ON "_AmenityToProperty"("B");
 ALTER TABLE "amenities" ADD CONSTRAINT "amenities_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "payments" ADD CONSTRAINT "payments_rentalRequestId_fkey" FOREIGN KEY ("rentalRequestId") REFERENCES "rentalrequests"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "payments" ADD CONSTRAINT "payments_rentalId_fkey" FOREIGN KEY ("rentalId") REFERENCES "rentals"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "payments" ADD CONSTRAINT "payments_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

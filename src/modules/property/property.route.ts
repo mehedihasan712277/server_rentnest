@@ -20,6 +20,7 @@ router.get(
     propertyController.getMyOwnPropertyList,
 );
 
+// router.get("/:propertyId", propertyController.getSingleProperty);
 router.get("/:propertyId", propertyController.getOneProperty);
 
 router.put(

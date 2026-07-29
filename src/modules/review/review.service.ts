@@ -4,22 +4,19 @@ import { IReviewPayload } from "./review.interface";
 const createReviewIntoDB = async (payload: IReviewPayload) => {
     if (
         !payload.propertyId ||
-        !payload.rentalRequestId ||
         !payload.tenantId ||
         !payload.rating ||
         !payload.comment
     ) {
         throw new Error(
-            "propertyId, rentalRequestId, tenantId, rating, and comment are required",
+            "propertyId, tenantId, rating, and comment are required",
         );
     }
 
-    const checkOwnership = await prisma.property.findFirst({
+    const checkOwnership = await prisma.rental.findFirst({
         where: {
-            id: payload.propertyId,
-            landlordId: {
-                not: payload.tenantId,
-            },
+            propertyId: payload.propertyId,
+            tenantId: payload.tenantId,
         },
     });
 
@@ -27,8 +24,29 @@ const createReviewIntoDB = async (payload: IReviewPayload) => {
         throw new Error("subscribe first to comment on this property.");
     }
 
+    const property = await prisma.property.findFirstOrThrow({
+        where: {
+            id: payload.propertyId,
+        },
+        include: {
+            rentalRequests: {
+                select: {
+                    id: true,
+                },
+            },
+        },
+    });
+
+    if (!property) {
+        throw new Error("failed to find rentalrequest id");
+    }
+    const data = {
+        ...payload,
+        rentalRequestId: property.rentalRequests[0]?.id as string,
+    };
+
     const result = await prisma.review.create({
-        data: payload,
+        data,
     });
     return result;
 };

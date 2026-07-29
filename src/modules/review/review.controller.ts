@@ -2,14 +2,17 @@ import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
+import { reviewServices } from "./review.service";
 const createReview = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         const payload = { ...req.body, tenantId: req.user?.id as string };
+        const result = await reviewServices.createReviewIntoDB(payload);
+
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.CREATED,
             message: "review posted successfully",
-            data: {},
+            data: result,
         });
     },
 );

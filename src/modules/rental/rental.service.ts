@@ -49,11 +49,13 @@ const getSubscriptionIdFromInvoice = (
 };
 
 /**
- * Idempotent: safe to call from multiple webhook events, and safe if
- * Stripe retries/redelivers the same event.
+ * Idempotent AND race-safe: safe to call from multiple webhook events, safe
+ * if Stripe retries/redelivers the same event, and safe if
+ * checkout.session.completed and invoice.paid arrive close enough together
+ * to be processed concurrently (which happens - Stripe fires them roughly
+ * 1 second apart for the first billing cycle).
  *
- * Creates the Rental row the first time we see this subscription. Uses
- * subscription.metadata.rentalRequestId (set in checkout.sessions.create's
+ * Uses subscription.metadata.rentalRequestId (set in checkout.sessions.create's
  * subscription_data.metadata) to find who/what this subscription is for,
  * so this works even if invoice.paid arrives before checkout.session.completed.
  */
@@ -78,18 +80,41 @@ const ensureRentalForSubscription = async (subscriptionId: string) => {
 
     const period = getSubscriptionPeriod(subscription);
 
-    const rental = await prisma.rental.create({
-        data: {
-            tenantId: rentalRequest.tenantId,
-            propertyId: rentalRequest.propertyId,
-            startDate: period.start,
-            status: SubscriptionStatus.ACTIVE,
-            stripeSubscriptionId: subscription.id,
-            currentPeriodStart: period.start,
-            currentPeriodEnd: period.end,
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        },
-    });
+    let rental;
+    try {
+        rental = await prisma.rental.create({
+            data: {
+                tenantId: rentalRequest.tenantId,
+                propertyId: rentalRequest.propertyId,
+                startDate: period.start,
+                status: SubscriptionStatus.ACTIVE,
+                stripeSubscriptionId: subscription.id,
+                currentPeriodStart: period.start,
+                currentPeriodEnd: period.end,
+                cancelAtPeriodEnd: subscription.cancel_at_period_end,
+            },
+        });
+    } catch (err) {
+        // checkout.session.completed and invoice.paid can be processed
+        // concurrently. If both passed the findUnique check above before
+        // either had created the row, the second create() here hits a
+        // unique constraint violation (P2002) on stripeSubscriptionId.
+        // That's fine - the other request already created it; just fetch it.
+        const isUniqueConstraintError =
+            err !== null &&
+            typeof err === "object" &&
+            "code" in err &&
+            (err as { code?: string }).code === "P2002";
+
+        if (isUniqueConstraintError) {
+            const rentalFromRace = await prisma.rental.findUnique({
+                where: { stripeSubscriptionId: subscriptionId },
+            });
+            if (rentalFromRace) return rentalFromRace;
+        }
+
+        throw err;
+    }
 
     // One active rental should block other tenants from applying/paying for the same property.
     await prisma.property.update({

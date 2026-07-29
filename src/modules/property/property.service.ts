@@ -152,7 +152,20 @@ const getAllPropertyFromDB = async (query: IPropertyQuery) => {
             [sortBy]: sortOrder,
         },
         include: {
-            reviews: true,
+            reviews: {
+                where: {
+                    status: "APPROVED",
+                },
+                select: {
+                    comment: true,
+                    tenant: {
+                        select: {
+                            name: true,
+                            email: true,
+                        },
+                    },
+                },
+            },
             landlord: {
                 select: {
                     name: true,

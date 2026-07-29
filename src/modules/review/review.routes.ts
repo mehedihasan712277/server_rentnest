@@ -7,9 +7,9 @@ const router = Router();
 
 router.post("/", auth(Role.TENANT), reviewControllers.createReview);
 router.get("/", auth(Role.ADMIN), reviewControllers.getAllReviews);
-router.get("/me", auth(Role.TENANT), reviewControllers.getMyReviews);
+router.get("/my-reviews", auth(Role.TENANT), reviewControllers.getMyReviews);
 router.get(
-    "/my-properties",
+    "/reviews-to-my-properties",
     auth(Role.LANDLORD),
     reviewControllers.getReviewsToMyProperty,
 );

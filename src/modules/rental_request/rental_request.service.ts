@@ -10,37 +10,48 @@ const createRequestIntoDB = async (payload: IRentalRequestPayload) => {
         where: {
             id: payload.propertyId,
         },
-        include: {
-            rentalRequests: {
-                select: {
-                    tenantId: true,
-                },
+    });
+
+    if (property.landlordId === payload.tenantId) {
+        throw new Error("You cannot request your own property.");
+    }
+
+    if (property.status === "NOTAVAILABLE") {
+        throw new Error("The property is not available anymore.");
+    }
+
+    const existingRequest = await prisma.rentalRequest.findUnique({
+        where: {
+            tenantId_propertyId: {
+                tenantId: payload.tenantId,
+                propertyId: payload.propertyId,
             },
         },
     });
 
-    if (property.landlordId === payload.tenantId) {
-        throw new Error("you cannot request for your own property");
-    }
+    if (existingRequest) {
+        if (existingRequest.status === RentalRequestStatus.DELETED) {
+            return prisma.rentalRequest.update({
+                where: {
+                    id: existingRequest.id,
+                },
+                data: {
+                    status: RentalRequestStatus.PENDING,
+                },
+            });
+        }
 
-    if (property.status === "NOTAVAILABLE") {
-        throw new Error("the property is not available anymore");
-    }
-
-    const alreadyRequested = property.rentalRequests.some(
-        (request) => request.tenantId === payload.tenantId,
-    );
-
-    if (alreadyRequested) {
         throw new Error(
             "You have already submitted a rental request for this property.",
         );
     }
 
-    const result = await prisma.rentalRequest.create({
-        data: { ...payload, landlordId: property.landlordId },
+    return prisma.rentalRequest.create({
+        data: {
+            ...payload,
+            landlordId: property.landlordId,
+        },
     });
-    return result;
 };
 
 const getAllRequestsFromDB = async () => {

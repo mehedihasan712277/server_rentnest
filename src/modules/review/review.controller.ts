@@ -4,6 +4,7 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 const createReview = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
+        const payload = { ...req.body, tenantId: req.user?.id as string };
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.CREATED,

@@ -31,43 +31,59 @@ const getAllReviews = catchAsync(
 );
 const getMyReviews = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
+        const result = await reviewServices.getMyReviewsFromDB(req.user!.id);
         sendResponse(res, {
             success: true,
-            count: 0,
+            count: result.length,
             statusCode: httpStatus.OK,
             message: "My reviews retrived successfully",
-            data: {},
+            data: result,
         });
     },
 );
 const getReviewsToMyProperty = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
+        const result = await reviewServices.getReviewsToMyPropertyFromDB(
+            req.user!.id,
+        );
         sendResponse(res, {
             success: true,
-            count: 0,
+            count: result.length,
             statusCode: httpStatus.OK,
             message: " reviews to my properties retrived successfully",
-            data: {},
+            data: result,
         });
     },
 );
 const deleteReview = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
+        const { reviewId } = req.params;
+        const result = await reviewServices.deleteReviewFromDB(
+            reviewId as string,
+        );
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.OK,
             message: " review deleted successfully",
-            data: null,
+            data: result,
         });
     },
 );
 const updateReview = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
+        const { reviewId } = req.params;
+        const { comment, rating } = req.body;
+
+        const result = await reviewServices.updateReviewIntoDB(
+            reviewId as string,
+            { comment, rating },
+        );
+
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.OK,
             message: "review updated successfully",
-            data: {},
+            data: result,
         });
     },
 );

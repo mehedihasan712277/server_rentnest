@@ -83,10 +83,76 @@ const getAllReviewsFrmDB = async () => {
     });
     return result;
 };
-const getMyReviewsFromDB = async () => {};
-const getReviewsToMyPropertyFromDB = async () => {};
-const deleteReviewFromDB = async () => {};
-const updateReviewIntoDB = async () => {};
+const getMyReviewsFromDB = async (tenantId: string) => {
+    const result = await prisma.review.findMany({
+        where: {
+            tenantId: tenantId,
+        },
+        include: {
+            property: {
+                select: {
+                    title: true,
+                    description: true,
+                    landlord: {
+                        select: {
+                            name: true,
+                            email: true,
+                        },
+                    },
+                },
+            },
+        },
+    });
+    return result;
+};
+const getReviewsToMyPropertyFromDB = async (landlordId: string) => {
+    const result = await prisma.review.findMany({
+        where: {
+            property: {
+                landlordId,
+            },
+        },
+        include: {
+            property: {
+                select: {
+                    title: true,
+                    description: true,
+                },
+            },
+            tenant: {
+                select: {
+                    name: true,
+                    email: true,
+                },
+            },
+        },
+    });
+    return result;
+};
+const deleteReviewFromDB = async (reviewId: string) => {
+    const result = await prisma.review.delete({
+        where: {
+            id: reviewId,
+        },
+    });
+    return null;
+};
+const updateReviewIntoDB = async (
+    reviewId: string,
+    payload: { comment: string; rating?: number },
+) => {
+    const result = await prisma.review.update({
+        where: {
+            id: reviewId,
+        },
+        data: {
+            comment: payload.comment,
+            rating: payload.rating,
+        },
+    });
+    return result;
+};
+
 const handleReviewStatusIntoDB = async (
     reviewId: string,
     status: ReviewStatus,

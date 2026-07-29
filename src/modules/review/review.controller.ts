@@ -3,6 +3,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
 import { reviewServices } from "./review.service";
+import { ReviewStatus } from "../../../generated/prisma/client";
 const createReview = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         const payload = { ...req.body, tenantId: req.user?.id as string };
@@ -18,12 +19,13 @@ const createReview = catchAsync(
 );
 const getAllReviews = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
+        const result = await reviewServices.getAllReviewsFrmDB();
         sendResponse(res, {
             success: true,
-            count: 0,
+            count: result.length,
             statusCode: httpStatus.OK,
             message: "all reviews retrived successfully",
-            data: {},
+            data: result,
         });
     },
 );
@@ -72,11 +74,19 @@ const updateReview = catchAsync(
 
 const handleReviewStatus = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
+        const { reviewId } = req.params;
+        const { status } = req.body;
+
+        const result = await reviewServices.handleReviewStatusIntoDB(
+            reviewId as string,
+            status as ReviewStatus,
+        );
+
         sendResponse(res, {
             success: true,
             statusCode: httpStatus.OK,
             message: "review updated successfully",
-            data: {},
+            data: result,
         });
     },
 );

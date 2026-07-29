@@ -1,3 +1,4 @@
+import { ReviewStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { IReviewPayload } from "./review.interface";
 
@@ -51,12 +52,55 @@ const createReviewIntoDB = async (payload: IReviewPayload) => {
     return result;
 };
 
-const getAllReviewsFrmDB = async () => {};
+const getAllReviewsFrmDB = async () => {
+    const result = await prisma.review.findMany({
+        include: {
+            property: {
+                select: {
+                    title: true,
+                    description: true,
+                    landlord: {
+                        select: {
+                            name: true,
+                            email: true,
+                        },
+                    },
+                    price: true,
+                    category: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                },
+            },
+            tenant: {
+                select: {
+                    name: true,
+                    email: true,
+                },
+            },
+        },
+    });
+    return result;
+};
 const getMyReviewsFromDB = async () => {};
 const getReviewsToMyPropertyFromDB = async () => {};
 const deleteReviewFromDB = async () => {};
 const updateReviewIntoDB = async () => {};
-const handleReviewStatusIntoDB = async () => {};
+const handleReviewStatusIntoDB = async (
+    reviewId: string,
+    status: ReviewStatus,
+) => {
+    const result = await prisma.review.update({
+        where: {
+            id: reviewId,
+        },
+        data: {
+            status: status as ReviewStatus,
+        },
+    });
+    return result;
+};
 
 export const reviewServices = {
     createReviewIntoDB,

@@ -113,9 +113,18 @@ const getAllPropertyFromDB = async (query: IPropertyQuery) => {
         });
     }
 
+    // if (query.location) {
+    //     andCondition.push({
+    //         location: query.location,
+    //     });
+    // }
+
     if (query.location) {
         andCondition.push({
-            location: query.location,
+            location: {
+                contains: String(query.location),
+                mode: "insensitive",
+            },
         });
     }
 
@@ -231,9 +240,18 @@ const getAllPropertyForAdminFromDB = async (query: IPropertyQuery) => {
         });
     }
 
+    // if (query.location) {
+    //     andCondition.push({
+    //         location: query.location,
+    //     });
+    // }
+
     if (query.location) {
         andCondition.push({
-            location: query.location,
+            location: {
+                contains: String(query.location),
+                mode: "insensitive",
+            },
         });
     }
 

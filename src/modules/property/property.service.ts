@@ -307,9 +307,41 @@ const getMyOwnPropertyListFromDB = async (creatorId: string) => {
                     description: true,
                 },
             },
-            rentalRequests: true,
-            reviews: true,
-            rentals: true,
+            rentalRequests: {
+                include: {
+                    tenant: {
+                        select: {
+                            name: true,
+                            email: true,
+                        },
+                    },
+                },
+            },
+            reviews: {
+                include: {
+                    tenant: {
+                        select: {
+                            name: true,
+                            email: true,
+                        },
+                    },
+                },
+            },
+            rentals: {
+                include: {
+                    tenant: {
+                        select: {
+                            name: true,
+                            email: true,
+                        },
+                    },
+                },
+            },
+            category: {
+                select: {
+                    name: true,
+                },
+            },
         },
     });
     return result;

@@ -269,8 +269,8 @@ const createSubscriptionCheckoutSession = async (
             // NEW — metadata on checkout.session doesn't
             metadata: { rentalRequestId: rentalRequest.id }, // carry to invoice/subscription events
         },
-        success_url: `${config.client_url}/rentals/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${config.client_url}/rentals/${rentalRequest.id}`,
+        success_url: `${config.client_url}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${config.client_url}/checkout/cancel/${rentalRequest.id}`,
     });
 
     await prisma.rentalRequest.update({
